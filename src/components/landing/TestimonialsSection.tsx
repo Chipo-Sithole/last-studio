@@ -36,7 +36,7 @@ export const TestimonialsSection = () => {
           <span className="text-sm font-medium tracking-widest uppercase text-primary mb-4 block">
             Testimonials
           </span>
-          <h2 className="font-serif text-4xl sm:text-5xl font-medium text-foreground mb-4">
+          <h2 className="font-sans text-4xl sm:text-5xl font-normal text-foreground mb-4">
             Loved by Our Clients
           </h2>
           <p className="text-muted-foreground max-w-lg mx-auto">

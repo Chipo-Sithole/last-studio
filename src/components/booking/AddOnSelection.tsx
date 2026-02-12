@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Check, Clock, Plus } from 'lucide-react';
 import { AddOn } from '@/types/booking';
 import { cn } from '@/lib/utils';
+import { formatDuration, formatCurrency } from '@/lib/format';
 
 interface AddOnSelectionProps {
   addOns: AddOn[];
@@ -64,11 +65,11 @@ export const AddOnSelection = ({
                 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
-                    <h4 className="font-medium text-foreground">
+                    <h4 className="font-normal text-foreground">
                       {addOn.name}
                     </h4>
                     <span className="text-sm font-medium text-primary whitespace-nowrap">
-                      +${addOn.price}
+                      +{formatCurrency(addOn.price)}
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -76,7 +77,7 @@ export const AddOnSelection = ({
                   </p>
                   <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
                     <Clock className="w-3 h-3" />
-                    <span>+{addOn.duration} min</span>
+                    <span>+{formatDuration(addOn.duration)}</span>
                   </div>
                 </div>
               </div>

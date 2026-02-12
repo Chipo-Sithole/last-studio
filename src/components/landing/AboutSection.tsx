@@ -33,21 +33,20 @@ export const AboutSection = () => {
             <span className="text-sm font-medium tracking-widest uppercase text-primary mb-4 block">
               About Us
             </span>
-            <h2 className="font-serif text-4xl sm:text-5xl font-medium text-foreground mb-6 leading-tight">
+            <h2 className="font-sans text-4xl sm:text-5xl font-normal text-foreground mb-6 leading-tight">
               Where Artistry Meets
               <span className="text-primary"> Precision</span>
             </h2>
             <p className="text-muted-foreground leading-relaxed mb-8">
-              At Luxe Lash Studio, we believe that beautiful lashes are an art form. 
-              Our dedicated team of certified lash artists combines technical expertise 
-              with creative vision to create stunning, personalized looks that enhance 
-              your natural beauty.
+              At Heavenly Lash Studio, we believe that beautiful lashes are an art form. 
+              Our certified lash artist combines technical expertise with creative vision 
+              to create stunning, personalized looks that enhance your natural beauty.
             </p>
             <p className="text-muted-foreground leading-relaxed">
-              Located in the heart of the city, our serene studio offers a tranquil 
-              escape where you can relax while we work our magic. Every detail, from 
-              our premium materials to our meticulous application technique, is designed 
-              to give you the lashes of your dreams.
+              As a mobile lash service, we bring the luxury experience directly to you. 
+              Enjoy professional lash extensions in the comfort and privacy of your own home. 
+              Every detail, from our premium materials to our meticulous application technique, 
+              is designed to give you the lashes of your dreams—all without leaving your door.
             </p>
           </motion.div>
 
@@ -71,7 +70,7 @@ export const AboutSection = () => {
                   <feature.icon className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-serif text-lg font-medium text-foreground mb-2">
+                  <h3 className="font-sans text-lg font-normal text-foreground mb-2">
                     {feature.title}
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">

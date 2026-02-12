@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Header } from '@/components/Header';
 import { ProgressIndicator } from './ProgressIndicator';
 import { ServiceCard } from './ServiceCard';
 import { ClientTabs } from './ClientTabs';
@@ -12,8 +13,10 @@ import { CustomerDetailsForm } from './CustomerDetailsForm';
 import { BookingReview } from './BookingReview';
 import { BookingSummary } from './BookingSummary';
 import { ConfirmationScreen } from './ConfirmationScreen';
-import { services, addOns, generateTimeSlots } from '@/data/services';
-import { ClientBooking, CustomerDetails, Service, AddOn } from '@/types/booking';
+import { useServices, useAddOns, useCreateAppointment, useAvailableSlots } from '@/hooks/useApi';
+import { ClientBooking, CustomerDetails, Service, AddOn, BookingData } from '@/types/booking';
+import { toast } from 'sonner';
+import { format } from 'date-fns';
 
 const STEPS = [
   { id: 'services', label: 'Services' },
@@ -31,20 +34,45 @@ const createClient = (index: number): ClientBooking => ({
   addOns: [],
 });
 
-export const BookingFlow = () => {
+interface BookingFlowProps {
+  onBackToLanding: () => void;
+  preselectedServiceId?: string | null;
+}
+
+export const BookingFlow = ({ onBackToLanding, preselectedServiceId }: BookingFlowProps) => {
+  // Fetch data from API
+  const { data: services = [], isLoading: servicesLoading, error: servicesError } = useServices();
+  const { data: addOns = [], isLoading: addOnsLoading } = useAddOns();
+  const createAppointment = useCreateAppointment();
+  
+  const initialClient = useMemo(() => createClient(0), []);
+  
   const [currentStep, setCurrentStep] = useState(0);
-  const [clients, setClients] = useState<ClientBooking[]>([createClient(0)]);
-  const [activeClientId, setActiveClientId] = useState(clients[0].id);
+  const [clients, setClients] = useState<ClientBooking[]>([initialClient]);
+  const [activeClientId, setActiveClientId] = useState(initialClient.id);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [customerDetails, setCustomerDetails] = useState<CustomerDetails | null>(null);
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [confirmationCode, setConfirmationCode] = useState<string | null>(null);
+
+  // Set preselected service after services load
+  useEffect(() => {
+    if (preselectedServiceId && services.length > 0 && !clients[0].service) {
+      const preselectedService = services.find(s => s.id === preselectedServiceId);
+      if (preselectedService) {
+        setClients(prev => prev.map((c, index) => 
+          index === 0 ? { ...c, service: preselectedService } : c
+        ));
+      }
+    }
+  }, [preselectedServiceId, services, clients]);
 
   const activeClient = clients.find(c => c.id === activeClientId);
-  const timeSlots = useMemo(
-    () => selectedDate ? generateTimeSlots(selectedDate) : [],
-    [selectedDate]
-  );
+  
+  // Fetch available time slots for selected date
+  const formattedDate = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : null;
+  const { data: timeSlots = [], isLoading: timeSlotsLoading } = useAvailableSlots(formattedDate);
 
   const canProceed = useMemo(() => {
     switch (currentStep) {
@@ -110,18 +138,56 @@ export const BookingFlow = () => {
     setCurrentStep(5);
   };
 
-  const handleConfirmBooking = () => {
-    setIsConfirmed(true);
+  const handleConfirmBooking = async () => {
+    if (!customerDetails || !selectedDate || !selectedTime) {
+      toast.error('Missing required booking information');
+      return;
+    }
+
+    // Format date as YYYY-MM-DD
+    const formattedDate = format(selectedDate, 'yyyy-MM-dd');
+
+    // Prepare booking data
+    const bookingData: BookingData = {
+      customer: {
+        firstName: customerDetails.firstName,
+        lastName: customerDetails.lastName,
+        email: customerDetails.email,
+        phone: customerDetails.phone,
+        location: customerDetails.location,
+        needsTransport: customerDetails.needsTransport || false,
+        isReturning: customerDetails.isReturning || false,
+      },
+      date: formattedDate,
+      timeSlot: selectedTime,
+      clients: clients.map(client => ({
+        serviceId: client.service!.id,
+        addOns: client.addOns.map(addon => addon.id),
+      })),
+      notes: customerDetails.notes,
+    };
+
+    try {
+      const response = await createAppointment.mutateAsync(bookingData);
+      setConfirmationCode(response.confirmation_code);
+      setIsConfirmed(true);
+      toast.success('Booking confirmed successfully!');
+    } catch (error: any) {
+      console.error('Booking error:', error);
+      toast.error(error.message || 'Failed to create booking. Please try again.');
+    }
   };
 
   const handleNewBooking = () => {
     setCurrentStep(0);
-    setClients([createClient(0)]);
-    setActiveClientId(clients[0].id);
+    const newClient = createClient(0);
+    setClients([newClient]);
+    setActiveClientId(newClient.id);
     setSelectedDate(null);
     setSelectedTime(null);
     setCustomerDetails(null);
     setIsConfirmed(false);
+    setConfirmationCode(null);
   };
 
   const goBack = () => {
@@ -138,27 +204,84 @@ export const BookingFlow = () => {
     }
   };
 
+  const handleHeaderBack = () => {
+    if (isConfirmed) {
+      handleNewBooking();
+    } else if (currentStep === 0) {
+      onBackToLanding();
+    } else {
+      goBack();
+    }
+  };
+
+  // Loading state
+  if (servicesLoading || addOnsLoading) {
+    return (
+      <>
+        <Header onBack={onBackToLanding} />
+        <div className="min-h-screen gradient-luxury">
+          <div className="container max-w-lg py-8 px-4">
+            <div className="flex items-center justify-center min-h-[60vh]">
+              <div className="text-center space-y-4">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+                <p className="text-muted-foreground">Loading services...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // Error state
+  if (servicesError) {
+    return (
+      <>
+        <Header onBack={onBackToLanding} />
+        <div className="min-h-screen gradient-luxury">
+          <div className="container max-w-lg py-8 px-4">
+            <div className="flex items-center justify-center min-h-[60vh]">
+              <div className="text-center space-y-4">
+                <p className="text-destructive font-medium">Failed to load services</p>
+                <p className="text-sm text-muted-foreground">
+                  Please check your connection and try again
+                </p>
+                <Button onClick={onBackToLanding}>Back to Home</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   if (isConfirmed && customerDetails && selectedDate && selectedTime) {
     return (
-      <div className="min-h-screen gradient-luxury">
-        <div className="container max-w-lg py-8 px-4">
-          <ConfirmationScreen
-            clients={clients}
-            selectedDate={selectedDate}
-            selectedTime={selectedTime}
-            customerDetails={customerDetails}
-            onNewBooking={handleNewBooking}
-          />
+      <>
+        <Header onBack={handleHeaderBack} />
+        <div className="min-h-screen gradient-luxury">
+          <div className="container max-w-lg py-8 px-4">
+            <ConfirmationScreen
+              clients={clients}
+              selectedDate={selectedDate}
+              selectedTime={selectedTime}
+              customerDetails={customerDetails}
+              confirmationCode={confirmationCode || undefined}
+              onNewBooking={handleNewBooking}
+            />
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen gradient-luxury pb-32">
-      <div className="container max-w-2xl py-6 px-4">
-        {/* Progress */}
-        <ProgressIndicator steps={STEPS} currentStep={currentStep} />
+    <>
+      <Header onBack={handleHeaderBack} />
+      <div className="min-h-screen gradient-luxury pb-32">
+        <div className="container max-w-2xl py-6 px-4">
+          {/* Progress */}
+          <ProgressIndicator steps={STEPS} currentStep={currentStep} />
 
         {/* Content */}
         <AnimatePresence mode="wait">
@@ -174,7 +297,7 @@ export const BookingFlow = () => {
             {currentStep === 0 && (
               <div className="space-y-6">
                 <div className="text-center space-y-2">
-                  <h1 className="font-serif text-3xl font-medium text-foreground">
+                  <h1 className="font-sans text-3xl font-normal text-foreground">
                     Choose Your Look
                   </h1>
                   <p className="text-muted-foreground">
@@ -191,14 +314,23 @@ export const BookingFlow = () => {
                 />
 
                 <div className="grid gap-4">
-                  {services.map((service) => (
-                    <ServiceCard
-                      key={service.id}
-                      service={service}
-                      isSelected={activeClient?.service?.id === service.id}
-                      onSelect={handleServiceSelect}
-                    />
-                  ))}
+                  {(() => {
+                    const sortedServices = preselectedServiceId
+                      ? [
+                          ...services.filter(s => s.id === preselectedServiceId),
+                          ...services.filter(s => s.id !== preselectedServiceId)
+                        ]
+                      : services;
+                    
+                    return sortedServices.map((service) => (
+                      <ServiceCard
+                        key={service.id}
+                        service={service}
+                        isSelected={activeClient?.service?.id === service.id}
+                        onSelect={handleServiceSelect}
+                      />
+                    ));
+                  })()}
                 </div>
               </div>
             )}
@@ -207,7 +339,7 @@ export const BookingFlow = () => {
             {currentStep === 1 && (
               <div className="space-y-6">
                 <div className="text-center space-y-2">
-                  <h1 className="font-serif text-3xl font-medium text-foreground">
+                  <h1 className="font-sans text-3xl font-normal text-foreground">
                     Pick a Date
                   </h1>
                   <p className="text-muted-foreground">
@@ -226,7 +358,7 @@ export const BookingFlow = () => {
             {currentStep === 2 && selectedDate && (
               <div className="space-y-6">
                 <div className="text-center space-y-2">
-                  <h1 className="font-serif text-3xl font-medium text-foreground">
+                  <h1 className="font-sans text-3xl font-normal text-foreground">
                     Choose a Time
                   </h1>
                   <p className="text-muted-foreground">
@@ -234,11 +366,24 @@ export const BookingFlow = () => {
                   </p>
                 </div>
 
-                <TimeSlotSelection
-                  slots={timeSlots}
-                  selectedTime={selectedTime}
-                  onTimeSelect={setSelectedTime}
-                />
+                {timeSlotsLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="text-center space-y-4">
+                      <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+                      <p className="text-sm text-muted-foreground">Loading available times...</p>
+                    </div>
+                  </div>
+                ) : timeSlots.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">No available time slots for this date</p>
+                  </div>
+                ) : (
+                  <TimeSlotSelection
+                    slots={timeSlots}
+                    selectedTime={selectedTime}
+                    onTimeSelect={setSelectedTime}
+                  />
+                )}
               </div>
             )}
 
@@ -246,7 +391,7 @@ export const BookingFlow = () => {
             {currentStep === 3 && (
               <div className="space-y-6">
                 <div className="text-center space-y-2">
-                  <h1 className="font-serif text-3xl font-medium text-foreground">
+                  <h1 className="font-sans text-3xl font-normal text-foreground">
                     Enhance Your Experience
                   </h1>
                   <p className="text-muted-foreground">
@@ -277,7 +422,7 @@ export const BookingFlow = () => {
             {currentStep === 4 && (
               <div className="space-y-6">
                 <div className="text-center space-y-2">
-                  <h1 className="font-serif text-3xl font-medium text-foreground">
+                  <h1 className="font-sans text-3xl font-normal text-foreground">
                     Your Details
                   </h1>
                   <p className="text-muted-foreground">
@@ -297,7 +442,7 @@ export const BookingFlow = () => {
             {currentStep === 5 && customerDetails && selectedDate && selectedTime && (
               <div className="space-y-6">
                 <div className="text-center space-y-2">
-                  <h1 className="font-serif text-3xl font-medium text-foreground">
+                  <h1 className="font-sans text-3xl font-normal text-foreground">
                     Review Your Booking
                   </h1>
                   <p className="text-muted-foreground">
@@ -347,16 +492,26 @@ export const BookingFlow = () => {
                 variant="luxury"
                 size="lg"
                 onClick={goNext}
-                disabled={!canProceed}
+                disabled={!canProceed || (currentStep === 5 && createAppointment.isPending)}
                 className="flex-1"
               >
-                {currentStep === 5 ? 'Confirm Booking' : 'Continue'}
-                <ArrowRight className="w-4 h-4 ml-2" />
+                {createAppointment.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    {currentStep === 5 ? 'Confirm Booking' : 'Continue'}
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </>
+                )}
               </Button>
             )}
           </div>
         </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };

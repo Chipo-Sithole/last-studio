@@ -1,43 +1,26 @@
 import { motion } from 'framer-motion';
-import { Clock, ArrowRight } from 'lucide-react';
+import { Clock, ArrowRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useServices } from '@/hooks/useApi';
+import { formatDuration, formatCurrency } from '@/lib/format';
 
-const services = [
-  {
-    name: 'Classic',
-    description: 'Timeless elegance with one extension per natural lash',
-    duration: '90 min',
-    price: 'From $120',
-    image: '✨',
-  },
-  {
-    name: 'Volume',
-    description: 'Luxurious fullness with handcrafted lash fans',
-    duration: '120 min',
-    price: 'From $175',
-    image: '💫',
-  },
-  {
-    name: 'Hybrid',
-    description: 'The best of both worlds, perfectly blended',
-    duration: '120 min',
-    price: 'From $185',
-    image: '🌟',
-  },
-  {
-    name: 'Mega Volume',
-    description: 'Maximum impact for the bold and beautiful',
-    duration: '180 min',
-    price: 'From $280',
-    image: '⭐',
-  },
-];
+// Service category images from public/sets images folder
+const serviceImages: Record<string, string> = {
+  'classic-natural': '/sets images/classic-lashes.jpg',
+  'classic-glamour': '/sets images/glamour-lashes.jpg',
+  'volume-light': '/sets images/natural-volume-lashes.jpg',
+  'volume-full': '/sets images/mega-volume-lashes.jpg',
+  'hybrid': '/sets images/hybrid-lashes.jpg',
+};
 
 interface ServicesPreviewProps {
-  onBookNow: () => void;
+  onBookNow: (serviceId?: string) => void;
 }
 
 export const ServicesPreview = ({ onBookNow }: ServicesPreviewProps) => {
+  // Fetch services from API
+  const { data: services = [], isLoading, error } = useServices();
+
   return (
     <section className="py-24 bg-secondary/30">
       <div className="container max-w-6xl px-6">
@@ -51,7 +34,7 @@ export const ServicesPreview = ({ onBookNow }: ServicesPreviewProps) => {
           <span className="text-sm font-medium tracking-widest uppercase text-primary mb-4 block">
             Our Services
           </span>
-          <h2 className="font-serif text-4xl sm:text-5xl font-medium text-foreground mb-4">
+          <h2 className="font-sans text-4xl sm:text-5xl font-normal text-foreground mb-4">
             Tailored to Perfection
           </h2>
           <p className="text-muted-foreground max-w-lg mx-auto">
@@ -60,34 +43,73 @@ export const ServicesPreview = ({ onBookNow }: ServicesPreviewProps) => {
           </p>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {services.map((service, index) => (
-            <motion.div
-              key={service.name}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1, duration: 0.5 }}
-              whileHover={{ y: -8 }}
-              className="group bg-card rounded-2xl p-6 border border-border hover:border-primary/30 hover:shadow-elevated transition-all duration-300"
-            >
-              <div className="text-4xl mb-4">{service.image}</div>
-              <h3 className="font-serif text-xl font-medium text-foreground mb-2 group-hover:text-primary transition-colors">
-                {service.name}
-              </h3>
-              <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                {service.description}
-              </p>
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <Clock className="w-4 h-4" />
-                  <span>{service.duration}</span>
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex justify-center items-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="text-center py-10 text-red-500">
+            Failed to load services. Please try again later.
+          </div>
+        )}
+
+        {/* Services Grid */}
+        {!isLoading && !error && (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {services.map((service, index) => (
+              <motion.div
+                key={service.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, duration: 0.5 }}
+                className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300"
+              >
+                {/* Service Image */}
+                <div className="relative h-56 overflow-hidden">
+                  <img
+                    src={serviceImages[service.id]}
+                    alt={service.name}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-                <span className="font-medium text-primary">{service.price}</span>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+
+                {/* Service Details */}
+                <div className="p-6 space-y-1">
+                  <h3 className="font-sans text-2xl font-light text-gray-900 text-center">
+                    {service.name}
+                  </h3>
+                  
+                  {/* Price and Duration - Horizontal Layout */}
+                  <div className="pb-4 space-y-1">
+                    {/* Price - Centered */}
+                    <p className="text-xl font-medium text-gray-900 text-center">
+                      {formatCurrency(service.price)}
+                    </p>
+                    
+                    {/* Duration - Centered Below */}
+                    <div className="flex items-center justify-center gap-2 text-gray-500">
+                      <Clock className="w-4 h-4" />
+                      <span className="text-sm">{formatDuration(service.duration)}</span>
+                    </div>
+                  </div>
+                  
+                  <Button
+                    onClick={() => onBookNow(service.id)}
+                    variant="luxury"
+                    className="w-full rounded-full h-10 text-sm font-normal"
+                  >
+                    SELECT
+                  </Button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -96,7 +118,7 @@ export const ServicesPreview = ({ onBookNow }: ServicesPreviewProps) => {
           transition={{ delay: 0.4, duration: 0.5 }}
           className="text-center mt-12"
         >
-          <Button variant="luxury" size="lg" onClick={onBookNow}>
+          <Button variant="luxury" size="lg" onClick={() => onBookNow()}>
             View All Services
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>

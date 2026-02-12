@@ -1,17 +1,22 @@
 import { motion } from 'framer-motion';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { CustomerDetails } from '@/types/booking';
+import { MapPin } from 'lucide-react';
 
 const customerSchema = z.object({
   firstName: z.string().min(2, 'First name is required'),
   lastName: z.string().min(2, 'Last name is required'),
   email: z.string().email('Please enter a valid email'),
   phone: z.string().min(10, 'Please enter a valid phone number'),
+  location: z.string().min(5, 'Please provide your location'),
+  needsTransport: z.boolean().optional(),
+  isReturning: z.boolean().optional(),
   notes: z.string().optional(),
 });
 
@@ -29,6 +34,7 @@ export const CustomerDetailsForm = ({
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<CustomerDetails>({
     resolver: zodResolver(customerSchema),
@@ -37,6 +43,9 @@ export const CustomerDetailsForm = ({
       lastName: '',
       email: '',
       phone: '',
+      location: '',
+      needsTransport: true,
+      isReturning: false,
       notes: '',
     },
   });
@@ -111,6 +120,74 @@ export const CustomerDetailsForm = ({
         {errors.phone && (
           <p className="text-xs text-destructive">{errors.phone.message}</p>
         )}
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="location" className="text-sm font-medium">
+          <div className="flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-primary" />
+            Your Location
+          </div>
+        </Label>
+        <Input
+          id="location"
+          {...register('location')}
+          placeholder="123 Main Street, Harare"
+          className="h-12 rounded-xl border-border focus:border-primary focus:ring-primary/20"
+        />
+        {errors.location && (
+          <p className="text-xs text-destructive">{errors.location.message}</p>
+        )}
+        <p className="text-xs text-muted-foreground">
+          We'll come to your location for the lash service
+        </p>
+      </div>
+      
+      <div className="flex items-start space-x-3 p-4 rounded-xl bg-primary/10 border border-primary/30">
+        <Controller
+          name="needsTransport"
+          control={control}
+          render={({ field }) => (
+            <Checkbox
+              id="needsTransport"
+              checked={true}
+              onCheckedChange={() => field.onChange(true)}
+              disabled={true}
+              className="mt-0.5"
+            />
+          )}
+        />
+        <div className="flex-1">
+          <Label
+            htmlFor="needsTransport"
+            className="text-sm font-semibold block text-foreground"
+          >
+            Transport fee - $2.00 (Required)
+          </Label>
+          <p className="text-xs text-muted-foreground mt-1">
+            Transport cost is $2 for all mobile lash services in Harare
+          </p>
+        </div>
+      </div>
+      
+      <div className="flex items-center space-x-2">
+        <Controller
+          name="isReturning"
+          control={control}
+          render={({ field }) => (
+            <Checkbox
+              id="isReturning"
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+          )}
+        />
+        <Label
+          htmlFor="isReturning"
+          className="text-sm font-normal cursor-pointer"
+        >
+          I'm a returning client
+        </Label>
       </div>
       
       <div className="space-y-2">

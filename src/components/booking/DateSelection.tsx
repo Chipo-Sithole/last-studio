@@ -54,7 +54,7 @@ export const DateSelection = ({ selectedDate, onDateSelect }: DateSelectionProps
             <ChevronLeft className="w-5 h-5" />
           </Button>
           
-          <h3 className="font-serif text-xl font-medium text-foreground">
+          <h3 className="font-sans text-xl font-normal text-foreground">
             {format(currentMonth, 'MMMM yyyy')}
           </h3>
           

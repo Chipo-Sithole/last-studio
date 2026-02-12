@@ -26,7 +26,7 @@ export const TimeSlotSelection = ({
 
   const SlotGroup = ({ title, slots: groupSlots }: { title: string; slots: TimeSlot[] }) => (
     <div className="space-y-3">
-      <h4 className="text-sm font-medium text-muted-foreground">{title}</h4>
+      <h4 className="text-sm font-normal text-muted-foreground">{title}</h4>
       <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
         {groupSlots.map((slot, index) => (
           <motion.button

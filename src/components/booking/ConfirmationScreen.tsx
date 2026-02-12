@@ -9,6 +9,7 @@ interface ConfirmationScreenProps {
   selectedDate: Date;
   selectedTime: string;
   customerDetails: CustomerDetails;
+  confirmationCode?: string;
   onNewBooking: () => void;
 }
 
@@ -17,6 +18,7 @@ export const ConfirmationScreen = ({
   selectedDate,
   selectedTime,
   customerDetails,
+  confirmationCode,
   onNewBooking,
 }: ConfirmationScreenProps) => {
   const formatTime = (time: string) => {
@@ -57,10 +59,21 @@ export const ConfirmationScreen = ({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="font-serif text-3xl font-medium text-foreground"
+          className="font-sans text-3xl font-medium text-foreground"
         >
           Booking Confirmed!
         </motion.h2>
+        {confirmationCode && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.55 }}
+            className="inline-block px-4 py-2 bg-primary/10 rounded-lg"
+          >
+            <p className="text-sm text-muted-foreground mb-1">Confirmation Code</p>
+            <p className="font-mono text-lg font-semibold text-primary">{confirmationCode}</p>
+          </motion.div>
+        )}
         <motion.p
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -108,9 +121,9 @@ export const ConfirmationScreen = ({
               <MapPin className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Location</p>
+              <p className="text-sm text-muted-foreground">Your Location</p>
               <p className="font-medium text-foreground">
-                Luxe Lash Studio
+                {customerDetails.location}
               </p>
             </div>
           </div>
@@ -147,7 +160,7 @@ export const ConfirmationScreen = ({
         </Button>
         
         <p className="text-xs text-muted-foreground">
-          Need to reschedule? Contact us at hello@luxelash.com
+          Need to reschedule? Contact us at heavenlylashstudiozw@gmail.com
         </p>
       </motion.div>
     </motion.div>

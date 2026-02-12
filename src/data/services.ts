@@ -41,14 +41,6 @@ export const services: Service[] = [
     price: 185,
     category: 'hybrid',
   },
-  {
-    id: 'mega-volume',
-    name: 'Mega Volume',
-    description: 'Maximum impact with 8-16 ultra-fine fans per lash. Red carpet ready.',
-    duration: 180,
-    price: 280,
-    category: 'mega',
-  },
 ];
 
 export const addOns: AddOn[] = [

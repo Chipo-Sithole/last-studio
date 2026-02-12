@@ -1,8 +1,11 @@
 import { motion } from 'framer-motion';
-import { Calendar, Clock, Mail, Phone, User, Sparkles } from 'lucide-react';
+import { Calendar, Clock, Mail, Phone, User, Sparkles, MapPin, Truck } from 'lucide-react';
 import { ClientBooking, CustomerDetails } from '@/types/booking';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { formatDuration, formatPrice, formatCurrency } from '@/lib/format';
+
+const TRANSPORT_FEE = 2; // $2 transport fee
 
 interface BookingReviewProps {
   clients: ClientBooking[];
@@ -26,10 +29,14 @@ export const BookingReview = ({
   };
 
   const totalPrice = clients.reduce((acc, client) => {
-    const servicePrice = client.service?.price || 0;
-    const addOnsPrice = client.addOns.reduce((sum, addon) => sum + addon.price, 0);
+    const servicePrice = formatPrice(client.service?.price || 0);
+    const addOnsPrice = client.addOns.reduce((sum, addon) => sum + formatPrice(addon.price), 0);
     return acc + servicePrice + addOnsPrice;
   }, 0);
+
+  // Transport fee is always included (mandatory for mobile service)
+  const transportFee = TRANSPORT_FEE;
+  const grandTotal = totalPrice + transportFee;
 
   const totalDuration = clients.reduce((acc, client) => {
     const serviceDuration = client.service?.duration || 0;
@@ -45,7 +52,7 @@ export const BookingReview = ({
     >
       {/* Appointment Details */}
       <div className="bg-card rounded-2xl border border-border p-5 space-y-4">
-        <h3 className="font-serif text-lg font-medium text-foreground">
+        <h3 className="font-sans text-lg font-normal text-foreground">
           Appointment Details
         </h3>
         
@@ -71,17 +78,17 @@ export const BookingReview = ({
           >
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-full bg-rose-soft flex items-center justify-center">
-                <Sparkles className="w-3 h-3 text-primary" />
+                <User className="w-3 h-3 text-primary" />
               </div>
-              <h4 className="font-medium text-foreground">{client.label}</h4>
+              <h4 className="font-normal text-foreground">{client.label}</h4>
             </div>
             
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium text-foreground">{client.service?.name}</p>
-                <p className="text-sm text-muted-foreground">{client.service?.duration} min</p>
+                <p className="text-sm text-muted-foreground">{formatDuration(client.service?.duration || 0)}</p>
               </div>
-              <span className="font-medium text-primary">${client.service?.price}</span>
+              <span className="font-medium text-primary">{formatCurrency(client.service?.price || 0)}</span>
             </div>
             
             {client.addOns.length > 0 && (
@@ -92,7 +99,7 @@ export const BookingReview = ({
                 {client.addOns.map((addon) => (
                   <div key={addon.id} className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">{addon.name}</span>
-                    <span className="text-foreground">+${addon.price}</span>
+                    <span className="text-foreground">+{formatCurrency(addon.price)}</span>
                   </div>
                 ))}
               </div>
@@ -103,7 +110,7 @@ export const BookingReview = ({
 
       {/* Contact Details */}
       <div className="bg-card rounded-2xl border border-border p-5 space-y-4">
-        <h3 className="font-serif text-lg font-medium text-foreground">
+        <h3 className="font-sans text-lg font-normal text-foreground">
           Contact Information
         </h3>
         
@@ -122,6 +129,11 @@ export const BookingReview = ({
           <span>{customerDetails.phone}</span>
         </div>
         
+        <div className="flex items-center gap-3 text-muted-foreground">
+          <MapPin className="w-4 h-4 text-primary" />
+          <span>{customerDetails.location}</span>
+        </div>
+        
         {customerDetails.notes && (
           <div className="pt-3 border-t border-border">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
@@ -133,15 +145,30 @@ export const BookingReview = ({
       </div>
 
       {/* Total */}
-      <div className="bg-rose-soft rounded-2xl p-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground">Total Duration</p>
-            <p className="font-medium text-foreground">{totalDuration} minutes</p>
+      <div className="bg-rose-soft rounded-2xl p-5 space-y-3">
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted-foreground">Services Subtotal</span>
+          <span className="font-medium text-foreground">{formatCurrency(totalPrice)}</span>
+        </div>
+        
+        <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Truck className="w-4 h-4" />
+            <span>Transport Fee</span>
           </div>
-          <div className="text-right">
-            <p className="text-sm text-muted-foreground">Total</p>
-            <p className="text-2xl font-serif font-medium text-foreground">${totalPrice}</p>
+          <span className="font-medium text-foreground">+{formatCurrency(transportFee)}</span>
+        </div>
+        
+        <div className="pt-3 border-t border-border/50">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Total Duration</p>
+              <p className="font-medium text-foreground">{formatDuration(totalDuration)}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-muted-foreground">Total</p>
+              <p className="text-2xl font-sans font-medium text-foreground">{formatCurrency(grandTotal)}</p>
+            </div>
           </div>
         </div>
       </div>

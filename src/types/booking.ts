@@ -4,7 +4,7 @@ export interface Service {
   description: string;
   duration: number; // in minutes
   price: number;
-  category: 'classic' | 'volume' | 'hybrid' | 'mega';
+  category: 'classic' | 'volume' | 'hybrid';
 }
 
 export interface AddOn {
@@ -32,6 +32,9 @@ export interface CustomerDetails {
   lastName: string;
   email: string;
   phone: string;
+  location: string;
+  needsTransport?: boolean;
+  isReturning?: boolean;
   notes?: string;
 }
 
@@ -51,3 +54,39 @@ export type BookingStep =
   | 'details'
   | 'review'
   | 'confirmation';
+
+export interface BookingData {
+  customer: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    location: string;
+    needsTransport: boolean;
+    isReturning: boolean;
+  };
+  date: string;
+  timeSlot: string;
+  clients: Array<{
+    serviceId: string;
+    addOns: string[];
+  }>;
+  notes?: string;
+}
+
+export interface Appointment {
+  id: number;
+  confirmationCode: string;
+  customerName: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  totalDuration: number;
+  totalPrice: number;
+  clients: Array<{
+    clientNumber: number;
+    service: Service;
+    addOns: AddOn[];
+  }>;
+  notes?: string;
+}

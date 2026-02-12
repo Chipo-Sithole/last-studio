@@ -3,17 +3,18 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { LandingHeader } from '@/components/landing/LandingHeader';
 import { HeroSection } from '@/components/landing/HeroSection';
 import { ServicesPreview } from '@/components/landing/ServicesPreview';
-import { AboutSection } from '@/components/landing/AboutSection';
-import { TestimonialsSection } from '@/components/landing/TestimonialsSection';
+import { WhyChooseUs } from '@/components/landing/WhyChooseUs';
+import { OurWork } from '@/components/landing/OurWork';
 import { CTASection } from '@/components/landing/CTASection';
 import { Footer } from '@/components/landing/Footer';
-import { Header } from '@/components/Header';
 import { BookingFlow } from '@/components/booking/BookingFlow';
 
 const Index = () => {
   const [showBooking, setShowBooking] = useState(false);
+  const [preselectedServiceId, setPreselectedServiceId] = useState<string | null>(null);
 
-  const handleBookNow = () => {
+  const handleBookNow = (serviceId?: string) => {
+    setPreselectedServiceId(serviceId || null);
     setShowBooking(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -33,8 +34,10 @@ const Index = () => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <Header onBack={handleBackToLanding} />
-            <BookingFlow />
+            <BookingFlow 
+              onBackToLanding={handleBackToLanding} 
+              preselectedServiceId={preselectedServiceId}
+            />
           </motion.div>
         ) : (
           <motion.div
@@ -50,11 +53,9 @@ const Index = () => {
               <div id="services">
                 <ServicesPreview onBookNow={handleBookNow} />
               </div>
-              <div id="about">
-                <AboutSection />
-              </div>
-              <div id="testimonials">
-                <TestimonialsSection />
+              <WhyChooseUs />
+              <div id="work">
+                <OurWork />
               </div>
               <div id="contact">
                 <CTASection onBookNow={handleBookNow} />

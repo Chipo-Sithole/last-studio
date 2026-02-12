@@ -17,7 +17,7 @@ export const CTASection = ({ onBookNow }: CTASectionProps) => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="font-serif text-4xl sm:text-5xl font-medium text-foreground mb-6 leading-tight">
+            <h2 className="font-sans text-4xl sm:text-5xl font-normal text-foreground mb-6 leading-tight">
               Ready for Your
               <span className="text-primary"> Transformation?</span>
             </h2>
@@ -38,8 +38,8 @@ export const CTASection = ({ onBookNow }: CTASectionProps) => {
             transition={{ delay: 0.2, duration: 0.6 }}
             className="bg-card rounded-2xl p-8 border border-border shadow-elevated"
           >
-            <h3 className="font-serif text-2xl font-medium text-foreground mb-6">
-              Visit Our Studio
+            <h3 className="font-sans text-2xl font-normal text-foreground mb-6">
+              We Come to You
             </h3>
             
             <div className="space-y-5">
@@ -48,10 +48,10 @@ export const CTASection = ({ onBookNow }: CTASectionProps) => {
                   <MapPin className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="font-medium text-foreground">Location</p>
+                  <p className="font-medium text-foreground">Service Area</p>
                   <p className="text-sm text-muted-foreground">
-                    123 Beauty Lane, Suite 100<br />
-                    New York, NY 10001
+                    Mobile Service in Harare<br />
+                    We come to your location
                   </p>
                 </div>
               </div>
@@ -63,7 +63,7 @@ export const CTASection = ({ onBookNow }: CTASectionProps) => {
                 <div>
                   <p className="font-medium text-foreground">Phone</p>
                   <p className="text-sm text-muted-foreground">
-                    (555) 123-4567
+                    +263 775 411 983
                   </p>
                 </div>
               </div>
@@ -75,8 +75,9 @@ export const CTASection = ({ onBookNow }: CTASectionProps) => {
                 <div>
                   <p className="font-medium text-foreground">Hours</p>
                   <p className="text-sm text-muted-foreground">
-                    Mon - Sat: 9:00 AM - 6:00 PM<br />
-                    Sun: Closed
+                    Mon - Fri: 6:00 PM - 22:00 PM<br />
+                    Sat :0930 AM - 6:00 PM<br />
+                    Sun : 2:00 PM - 6:00 PM
                   </p>
                 </div>
               </div>

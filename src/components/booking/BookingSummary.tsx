@@ -1,19 +1,27 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, Sparkles } from 'lucide-react';
-import { ClientBooking } from '@/types/booking';
+import { Clock, Sparkles, Truck } from 'lucide-react';
+import { ClientBooking, CustomerDetails } from '@/types/booking';
 import { cn } from '@/lib/utils';
+import { formatDuration, formatPrice, formatCurrency } from '@/lib/format';
+
+const TRANSPORT_FEE = 2; // $2 transport fee
 
 interface BookingSummaryProps {
   clients: ClientBooking[];
+  customerDetails?: CustomerDetails | null;
   className?: string;
 }
 
-export const BookingSummary = ({ clients, className }: BookingSummaryProps) => {
+export const BookingSummary = ({ clients, customerDetails, className }: BookingSummaryProps) => {
   const totalPrice = clients.reduce((acc, client) => {
-    const servicePrice = client.service?.price || 0;
-    const addOnsPrice = client.addOns.reduce((sum, addon) => sum + addon.price, 0);
+    const servicePrice = formatPrice(client.service?.price || 0);
+    const addOnsPrice = client.addOns.reduce((sum, addon) => sum + formatPrice(addon.price), 0);
     return acc + servicePrice + addOnsPrice;
   }, 0);
+
+  // Transport fee is always included (mandatory for mobile service)
+  const transportFee = TRANSPORT_FEE;
+  const grandTotal = totalPrice + transportFee;
 
   const totalDuration = clients.reduce((acc, client) => {
     const serviceDuration = client.service?.duration || 0;
@@ -41,22 +49,26 @@ export const BookingSummary = ({ clients, className }: BookingSummaryProps) => {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                 <Clock className="w-4 h-4" />
-                <span>{totalDuration} min</span>
+                <span>{formatDuration(totalDuration)}</span>
               </div>
               <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                 <Sparkles className="w-4 h-4" />
                 <span>{clients.filter(c => c.service).length} {clients.filter(c => c.service).length === 1 ? 'client' : 'clients'}</span>
               </div>
+              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <Truck className="w-4 h-4" />
+                <span>+{formatCurrency(transportFee)}</span>
+              </div>
             </div>
             <AnimatePresence mode="wait">
               <motion.span
-                key={totalPrice}
+                key={grandTotal}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="text-2xl font-serif font-medium text-foreground"
+                className="text-2xl font-sans font-medium text-foreground"
               >
-                ${totalPrice}
+                {formatCurrency(grandTotal)}
               </motion.span>
             </AnimatePresence>
           </div>
