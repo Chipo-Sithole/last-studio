@@ -159,15 +159,24 @@ EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
 
 ## 🚢 Deployment
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
+**Deployed on Digital Ocean Droplet**
 
-**Quick Deploy to Digital Ocean:**
-```bash
-# Push to GitHub
-git push origin main
+### 📚 Deployment Guides
+- **[DROPLET-MANUAL.md](./DROPLET-MANUAL.md)** - Complete step-by-step deployment guide
+- **[DROPLET-CHECKLIST.md](./DROPLET-CHECKLIST.md)** - Quick checklist for droplet creation
+- **[SSH-KEYS-GUIDE.md](./SSH-KEYS-GUIDE.md)** - SSH key setup guide
+- **[TERMIUS-SETUP.md](./TERMIUS-SETUP.md)** - Termius SSH client setup
 
-# Follow the guide in QUICKSTART.md
-```
+### 🔧 Configuration Files
+All deployment configs are in the `/deploy` folder:
+- `nginx.conf` - Web server configuration
+- `lash-backend.service` - Backend systemd service
+- `lash-backend.socket` - Backend socket configuration
+- `deploy.sh` - Quick update script
+
+### 💰 Cost
+- **$18/month** - Single 2GB droplet (includes everything)
+- Ubuntu 22.04 + PostgreSQL + Nginx + Django + React
 
 ## 📝 Scripts
 

@@ -22,6 +22,23 @@ Deploy Lash Suite Luxe to Digital Ocean Droplet - Learning every step!
 
 ## 🚀 Part 1: Create and Secure Droplet (15 mins)
 
+### Prerequisites: Setup SSH Key (Recommended - 5 mins)
+
+**Before creating droplet, set up SSH keys for better security!**
+
+👉 **Follow [SSH-KEYS-GUIDE.md](./SSH-KEYS-GUIDE.md) first**
+
+Quick summary:
+```powershell
+# Generate SSH key
+ssh-keygen -t rsa -b 4096 -C "your-email@gmail.com"
+
+# View public key
+cat ~\.ssh\id_rsa.pub
+
+# Copy output and add to Digital Ocean → Settings → Security → SSH Keys
+```
+
 ### Step 1: Create Droplet
 
 1. Log in to https://cloud.digitalocean.com/
@@ -31,12 +48,17 @@ Deploy Lash Suite Luxe to Digital Ocean Droplet - Learning every step!
    - **Droplet Type**: Basic
    - **CPU options**: Regular - $18/month (2GB / 2 vCPUs)
    - **Datacenter**: Choose closest to Zimbabwe (e.g., London, Frankfurt)
+   - **Additional Options**: 
+     - ❌ **SKIP "Add a database"** - We'll install PostgreSQL on the droplet!
    - **Authentication**: 
-     - Choose **Password** (easier for learning)
-     - Set a strong password
+     - ✅ **Choose "SSH keys"** (recommended)
+     - Check the box next to your SSH key
+     - *OR use Password if you skipped SSH key setup*
    - **Hostname**: `lash-suite-luxe`
 4. Click **Create Droplet**
 5. **Wait 1-2 minutes** - Note your droplet IP address
+
+**Important:** The "Add a database" option is for Managed Database ($15/month extra). We're installing PostgreSQL directly on the droplet in Part 2!
 
 ### Step 2: Connect via SSH
 
@@ -45,9 +67,11 @@ Deploy Lash Suite Luxe to Digital Ocean Droplet - Learning every step!
 ssh root@YOUR_DROPLET_IP
 ```
 
-Enter your password when prompted.
+**If using SSH key:** Connects automatically! 🎉
 
-**First login tip:** Type `yes` when asked about authenticity.
+**If using password:** Enter your password when prompted.
+
+**First login tip:** Type `yes` when asked about authenticity of host.
 
 ### Step 3: Update System
 
