@@ -1,73 +1,223 @@
-# Welcome to your Lovable project
+# Lash Suite Luxe - Premium Lash Booking System
 
-## Project info
+A modern, full-stack booking platform for a premium lash extension studio. Features an elegant frontend experience and robust Django REST API backend.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+![Lash Suite Luxe](https://img.shields.io/badge/Lash-Suite%20Luxe-pink?style=for-the-badge)
+![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react)
+![Django](https://img.shields.io/badge/Django-5.1-092E20?style=flat-square&logo=django)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript)
 
-## How can I edit this code?
+## ✨ Features
 
-There are several ways of editing your application.
+- **🎯 Multi-Client Booking** - Book appointments for multiple clients simultaneously
+- **📅 Real-Time Availability** - Live time slot availability checking
+- **💅 5 Premium Services** - Classic Natural, Classic Glamour, Light Volume, Full Volume, Hybrid Set
+- **✨ Add-Ons** - Lash bath, colored tips, bottom lashes, growth serum
+- **📍 Location Selection** - Studio or mobile service options
+- **🚗 Transport Coordination** - Optional transport service for mobile bookings
+- **📧 Email Notifications** - Automated booking confirmations
+- **📱 Responsive Design** - Seamless experience across all devices
+- **🎨 Elegant UI** - Modern, animation-rich interface with Framer Motion
 
-**Use Lovable**
+## 🏗 Architecture
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+```
+lash-suite-luxe/
+├── src/                      # React Frontend
+│   ├── components/           # UI Components
+│   │   ├── booking/         # Booking flow components
+│   │   ├── landing/         # Landing page sections
+│   │   └── ui/              # shadcn/ui components
+│   ├── hooks/               # Custom React hooks
+│   ├── lib/                 # Utilities & API client
+│   ├── pages/               # Page components
+│   └── types/               # TypeScript definitions
+│
+└── lash-backend/            # Django REST API
+    ├── bookings/            # Bookings app
+    │   ├── models.py        # Data models
+    │   ├── views.py         # API endpoints
+    │   ├── services.py      # Business logic
+    │   └── serializers/     # DRF serializers
+    └── config/              # Django settings
+```
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🚀 Tech Stack
 
-**Use your preferred IDE**
+### Frontend
+- **React 18** - UI framework
+- **TypeScript** - Type safety
+- **Vite** - Build tool
+- **TanStack Query** - Server state management
+- **Framer Motion** - Animations
+- **Tailwind CSS** - Styling
+- **shadcn/ui** - Component library
+- **React Hook Form** - Form validation
+- **date-fns** - Date utilities
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Backend
+- **Django 5.1** - Web framework
+- **Django REST Framework** - API framework
+- **PostgreSQL** - Production database
+- **SQLite** - Development database
+- **python-dotenv** - Environment management
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 📦 Installation
 
-Follow these steps:
+### Prerequisites
+- Node.js 18+ and npm
+- Python 3.13+
+- Git
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Frontend Setup
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+```bash
+# Clone the repository
+git clone https://github.com/Chipo-Sithole/last-studio.git
+cd last-studio
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The frontend will be available at `http://localhost:5173`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Backend Setup
 
-**Use GitHub Codespaces**
+```bash
+# Navigate to backend directory
+cd lash-backend
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# Create virtual environment
+python -m venv venv
 
-## What technologies are used for this project?
+# Activate virtual environment
+# On Windows:
+.venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
 
-This project is built with:
+# Install dependencies
+pip install -r requirements.txt
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your configuration
 
-## How can I deploy this project?
+# Run migrations
+python manage.py migrate
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+# Create superuser (for admin access)
+python manage.py createsuperuser
 
-## Can I connect a custom domain to my Lovable project?
+# Seed initial data
+python manage.py seed_data
 
-Yes, you can!
+# Start development server
+python manage.py runserver
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+The backend API will be available at `http://localhost:8000/api`
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 🔧 Configuration
+
+### Environment Variables
+
+**Frontend (.env)**
+```env
+VITE_API_URL=http://localhost:8000/api
+```
+
+**Backend (lash-backend/.env)**
+```env
+DEBUG=True
+SECRET_KEY=your-secret-key-here
+ALLOWED_HOSTS=localhost,127.0.0.1
+CORS_ALLOWED_ORIGINS=http://localhost:5173
+EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+```
+
+## 📊 API Endpoints
+
+### Services
+- `GET /api/services/` - List all active services
+- `GET /api/services/{id}/` - Get service details
+
+### Add-Ons
+- `GET /api/add-ons/` - List all add-ons
+
+### Time Slots
+- `GET /api/time-slots/` - Get available time slots
+  - Query params: `date` (YYYY-MM-DD), `service_ids`
+
+### Appointments
+- `POST /api/appointments/` - Create new appointment
+- `GET /api/appointments/{id}/` - Get appointment details
+
+## 🚢 Deployment
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
+
+**Quick Deploy to Digital Ocean:**
+```bash
+# Push to GitHub
+git push origin main
+
+# Follow the guide in QUICKSTART.md
+```
+
+## 📝 Scripts
+
+### Frontend
+```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run preview      # Preview production build
+npm run lint         # Lint code
+```
+
+### Backend
+```bash
+python manage.py runserver      # Start dev server
+python manage.py migrate        # Run migrations
+python manage.py seed_data      # Seed database
+python manage.py test          # Run tests
+```
+
+## 🎨 Services Offered
+
+1. **Classic Natural** - Subtle, refined everyday elegance ($120, 90 min)
+2. **Classic Glamour** - Dramatic length for special occasions ($145, 105 min)
+3. **Light Volume** - Soft, fluffy fullness with 2-3 extensions ($175, 120 min)
+4. **Full Volume** - Bold, dramatic density with 4-6 lash fans ($220, 150 min)
+5. **Hybrid Set** - Perfect blend of classic and volume ($185, 120 min)
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is private and proprietary.
+
+## 👤 Author
+
+**Chipo Sithole**
+- GitHub: [@Chipo-Sithole](https://github.com/Chipo-Sithole)
+
+## 🙏 Acknowledgments
+
+- Built with modern best practices
+- Designed for scalability and performance
+- Optimized for user experience
+
+---
+
+**Repository**: [https://github.com/Chipo-Sithole/last-studio](https://github.com/Chipo-Sithole/last-studio)
