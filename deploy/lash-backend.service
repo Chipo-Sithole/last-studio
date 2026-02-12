@@ -1,0 +1,38 @@
+[Unit]
+Description=Lash Suite Luxe Backend Service
+Requires=lash-backend.socket
+After=network.target postgresql.service
+
+[Service]
+Type=notify
+User=lashapp
+Group=www-data
+RuntimeDirectory=lash-backend
+WorkingDirectory=/var/www/lash-suite-luxe/lash-backend
+Environment="PATH=/var/www/lash-suite-luxe/lash-backend/venv/bin"
+ExecStart=/var/www/lash-suite-luxe/lash-backend/venv/bin/gunicorn \
+          --workers 3 \
+          --bind unix:/run/lash-backend.sock \
+          --timeout 60 \
+          --access-logfile /var/log/lash-backend/access.log \
+          --error-logfile /var/log/lash-backend/error.log \
+          --log-level info \
+          config.wsgi:application
+
+# Restart policy
+Restart=on-failure
+RestartSec=10
+KillMode=mixed
+KillSignal=SIGQUIT
+TimeoutStopSec=5
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/www/lash-suite-luxe/lash-backend
+ReadWritePaths=/run/lash-backend.sock
+
+[Install]
+WantedBy=multi-user.target

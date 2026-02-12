@@ -1,0 +1,12 @@
+[Unit]
+Description=Lash Suite Luxe Backend Socket
+PartOf=lash-backend.service
+
+[Socket]
+ListenStream=/run/lash-backend.sock
+SocketUser=www-data
+SocketGroup=www-data
+SocketMode=0660
+
+[Install]
+WantedBy=sockets.target
